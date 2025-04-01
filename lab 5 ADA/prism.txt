@@ -1,0 +1,81 @@
+#include <stdio.h>
+
+#define INF 9999  // No connection is represented by a large number
+
+int cost[10][10], n, t[10][2], sum;
+
+void prims(int cost[10][10], int n);
+
+int main() {
+    int i, j;
+    printf("Enter the number of vertices: ");
+    scanf("%d", &n);
+
+    printf("Enter the cost adjacency matrix (use %d for no connection):\n", INF);
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < n; j++) {
+            scanf("%d", &cost[i][j]);
+        }
+    }
+
+    prims(cost, n);
+
+    printf("Edges of the minimal spanning tree:\n");
+    for (i = 0; i < n - 1; i++) {
+        // Print edges in ascending order of vertex numbers (min(u, v), max(u, v))
+        printf("(%d, %d) ", t[i][0], t[i][1]);
+    }
+    printf("\nSum of minimal spanning tree: %d\n", sum);
+
+    return 0;
+}
+
+void prims(int cost[10][10], int n) {
+    int i, j, u, v;
+    int min, source;
+    int p[10], d[10], s[10];
+    min = INF;
+    source = 0;
+
+    // Initialize arrays
+    for (i = 0; i < n; i++) {
+        d[i] = cost[source][i];
+        s[i] = 0;  // Not yet included in MST
+        p[i] = source;  // Parent of each vertex
+    }
+
+    s[source] = 1;  // Start with the source node in MST
+    sum = 0;
+    int k = 0;  // Edge counter for MST
+
+    // Find MST
+    for (i = 0; i < n - 1; i++) {
+        min = INF;
+        u = -1;
+
+        // Find the vertex with minimum distance to the MST
+        for (j = 0; j < n; j++) {
+            if (s[j] == 0 && d[j] < min) {
+                min = d[j];
+                u = j;
+            }
+        }
+
+        if (u != -1) {
+            // Add edge to MST (correcting the edge recording)
+            t[k][0] = p[u];  // Parent of u
+            t[k][1] = u;  // The node itself
+            k++;
+            sum += cost[u][p[u]];  // Add weight to MST total sum
+            s[u] = 1;  // Mark node u as included in MST
+
+            // Update distances
+            for (v = 0; v < n; v++) {
+                if (s[v] == 0 && cost[u][v] < d[v]) {
+                    d[v] = cost[u][v];
+                    p[v] = u;
+                }
+            }
+        }
+    }
+}
